@@ -25,10 +25,16 @@ public class WebPage implements Runnable{
 	String html;
 	String text;
 	String charSet;
-	
+	String title=new String();
 	int nowChild=0;
 	int depth=0;
 	Vector<WebPage> childWeb=new Vector<WebPage>();
+	public void setTitle(String _title){
+		title=_title;
+	}
+	public String getTitle(){
+		return title;
+	}
 	private String getCharSet(String content) {  
 
 		String regex = "<meta.+?charset=[^\\w]?([-\\w]+)";  
@@ -45,7 +51,7 @@ public class WebPage implements Runnable{
 		Matcher matcher = pattern.matcher(content);  
 		if (matcher.find()){
 			String temp=matcher.group(1);
-			return temp.replace("<BR>", "\n").replaceAll(" +","  ");
+			return temp.replace("<BR>", "").replaceAll(" +","  ");
 		}
 		else  
 			return null;  
@@ -64,7 +70,8 @@ public class WebPage implements Runnable{
 		String tmp=new String();
 		for (int i=0;i<childWeb.size();i++)
 		{
-			tmp=tmp+childWeb.elementAt(i).getText();
+			tmp=tmp+"\r\n"+childWeb.elementAt(i).getTitle()+"\r\n"+"================================="+"\r\n"+
+					childWeb.elementAt(i).getText();
 		}
 		BufferedWriter fileWriter;
 		try {
@@ -72,7 +79,6 @@ public class WebPage implements Runnable{
 			fileWriter.write(tmp);
 			fileWriter.close();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
 	}
@@ -88,7 +94,6 @@ public class WebPage implements Runnable{
 		    html=new String(raw);
 		    charSet=getCharSet(html);
 		    html=new String(raw,charSet);
-		  //  System.out.println(html);
 		    EntityUtils.consume(entity);
 		    Parser parser= new Parser(html);
 		    TagNameFilter aFilter=new TagNameFilter("a");
@@ -106,9 +111,8 @@ public class WebPage implements Runnable{
                 	String leftURL=url.substring(0, i1+1);
                 	childWeb.add(new WebPage(leftURL+linkURL,depth-1));
                 }
-             //   System.out.println(link.getAttribute("href"));
-              //  System.out.println(newURL);
-             //   System.out.println("=================================================");
+            	childWeb.elementAt(i).setTitle(link.getLinkText().replaceAll("[\\s]"," ").replaceAll(" +"," "));
+          
             }
 		} finally {
 		    response.close();
@@ -119,7 +123,7 @@ public class WebPage implements Runnable{
 		try {
 			getHtml();
 			text=getContent(html);
-		//	System.out.println(text);
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -134,7 +138,6 @@ public class WebPage implements Runnable{
 			try {
 				threads.elementAt(i).join();
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		if (depth>=1)
