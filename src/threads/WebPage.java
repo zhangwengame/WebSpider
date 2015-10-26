@@ -2,9 +2,9 @@ package threads;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.util.Random;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,12 +29,22 @@ public class WebPage implements Runnable{
 	int nowChild=0;
 	int depth=0;
 	Vector<WebPage> childWeb=new Vector<WebPage>();
+	public WebPage(String _url,int _depth){
+		url=_url;
+		depth=_depth;
+	}
 	public void setTitle(String _title){
 		title=_title;
 	}
 	public String getTitle(){
 		return title;
 	}
+	public int getChildSize(){
+		return childWeb.size();
+	}
+	public String getText(){
+		return text;
+	}	
 	private String getCharSet(String content) {  
 
 		String regex = "<meta.+?charset=[^\\w]?([-\\w]+)";  
@@ -55,16 +65,6 @@ public class WebPage implements Runnable{
 		}
 		else  
 			return null;  
-	}
-	public int getChildSize(){
-		return childWeb.size();
-	}
-	public WebPage(String _url,int _depth){
-		url=_url;
-		depth=_depth;
-	}
-	public String getText(){
-		return text;
 	}
 	private void writeText() {		
 		String tmp=new String();
@@ -131,6 +131,13 @@ public class WebPage implements Runnable{
 			for (int i=0;i<childWeb.size();i++){
 				Thread tThread=new Thread(childWeb.elementAt(i));
 				threads.add(tThread);
+				Random ran=new Random();
+				int sleepTime=ran.nextInt(1000);
+				try {
+					Thread.sleep(sleepTime);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 				tThread.start();
 			}
 		}
